@@ -69,6 +69,12 @@ class Repository(BaseRepository):
         Returns a list of files in a directory (list of strings) at a given
         revision, or HEAD if revision is None.
         """
+        # Add an ending slash to path, otherwise the file
+        # names start with it, also it does not list files
+        # inside another folder
+        if path and path[-1] != os.path.sep:
+            path += os.path.sep
+        
         chgctx = self.repo.changectx(revision or 'tip')
         file_list = []
         folder_list = set()
