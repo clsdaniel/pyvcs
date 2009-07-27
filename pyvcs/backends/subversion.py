@@ -75,6 +75,27 @@ class Repository(BaseRepository):
         return self._log_to_commit(log)
 
 
+    def get_latest_commits(self, n=10):
+        
+        revhead = pysvn.Revision(pysvn.opt_revision_kind.committed)
+        rev = pysvn.Revision(pysvn.opt_revision_kind.previous)
+        
+        log_list = self._repo.log(self.path, revision_start=revhead,
+            revision_end=rev, discover_changed_paths=True)
+        bottom = log_list[-1]
+        rev = bottom['revision']
+        while len(log_list) < n:
+            revhead = pysvn.Revision(pysvn.opt_revision_kind.number, rev.number - 1)
+            rev = pysvn.Revision(pysvn.opt_revision_kind.number, revhead.number - n - len(log_list))
+            
+            logs = self._repo.log(self.path, revision_start=revhead,
+                                      revision_end=rev, discover_changed_paths=True)
+            log_list.extend(logs)
+            
+        commits = [self._log_to_commit(log) for log in log_list]
+        return commits
+            
+    
     def get_recent_commits(self, since=None):
         if since is None:
             since = datetime.now() - timedelta(days=5)
