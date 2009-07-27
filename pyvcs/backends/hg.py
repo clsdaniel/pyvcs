@@ -41,6 +41,20 @@ class Repository(BaseRepository):
         changeset = self.repo.changectx(commit_id)
         return self._ctx_to_commit(changeset)
 
+    def get_latest_commits(self, n=10):
+        cur_ctx = self.repo.changectx(self.repo.changelog.rev(self.repo.changelog.tip()))
+
+        changesets = []
+        to_look_at = [cur_ctx]
+
+        i = 0
+        while to_look_at and i < n:
+            head = to_look_at.pop(0)
+            to_look_at.extend(head.parents())
+            i += 1
+
+        return [self._ctx_to_commit(ctx) for ctx in changesets] or None
+    
     def get_recent_commits(self, since=None):
         """
         Returns all commits since since.  If since is None returns all commits
