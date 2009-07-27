@@ -64,6 +64,19 @@ class Repository(BaseRepository):
         else:
             return self._branch.repository.revision_tree(self._branch.last_revision())
 
+    def get_latest_commits(self, n=10):
+        commits = []
+        hist = self._branch.revision_history()
+        hist.reverse()
+        
+        for i, rev_id in enumerate(hist):
+            rev = self._branch.repository.get_revision(rev_id)
+            if i == n:
+                break
+            commits.append(self._rev_to_commit(rev))
+
+        return commits
+    
     def get_recent_commits(self, since=None):
         if since is None:
             since = datetime.now() - timedelta(days=5)
