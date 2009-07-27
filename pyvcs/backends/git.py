@@ -84,6 +84,24 @@ class Repository(BaseRepository):
             datetime.fromtimestamp(commit.commit_time), commit.message, files,
             generate_unified_diff(self, files, commit.parents[0], commit.id))
 
+    def get_latest_commits(self, n=10):
+        pending_commits = self._repo.get_refs().values()
+        history = {}
+        i = 0
+        while pending_commits:
+            head = pending_commits.pop(0)
+            try:
+                commit = self._repo.commit(head)
+            except KeyError:
+                raise CommitDoesNotExist
+            if commit.id in history or i == n:
+                continue
+            history[commit.id] = commit
+            pending_commits.extend(commit.parents)
+            i += 1
+        commits = map(lambda o: self.get_commit_by_id(o.id), history.values())
+        return sorted(commits, key=attrgetter('time'), reverse=True)
+    
     def get_recent_commits(self, since=None):
         if since is None:
             since = datetime.now() - timedelta(days=5)
