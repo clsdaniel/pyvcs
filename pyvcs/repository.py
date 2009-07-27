@@ -12,6 +12,12 @@ class BaseRepository(object):
         Returns a commit by its id (nature of the ID is VCS dependent).
         """
         raise NotImplementedError
+    
+    def get_latest_commits(self, n=10):
+        """
+        Return the last n commits
+        """
+        raise NotImplementedError
 
     def get_recent_commits(self, since=None):
         """
