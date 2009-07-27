@@ -51,6 +51,7 @@ class Repository(BaseRepository):
         while to_look_at and i < n:
             head = to_look_at.pop(0)
             to_look_at.extend(head.parents())
+            changesets.append(head)
             i += 1
 
         return [self._ctx_to_commit(ctx) for ctx in changesets] or None
